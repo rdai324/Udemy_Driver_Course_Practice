@@ -5,12 +5,18 @@
  *      Author: Ray Dai
  */
 
-#ifndef INC_STM32L476RG_H_
-#define INC_STM32L476RG_H_
+#ifndef INC_STM32L476XX_H_
+#define INC_STM32L476XX_H_
 
 //---------------------------------------------Start of Written Code--------------------------------------
 
-#define vol volatile
+#define vol		volatile
+#define EN		1
+#define ENABLE	1
+#define SET		1
+#define DI		0
+#define DISABLE	0
+#define RESET	0
 
 // Memory Base Address Macros
 #define FLASH_BASE_ADDR		0x0800 0000UL
@@ -235,4 +241,4 @@ typedef struct {
 
 //---------------------------------------------End of Written Code--------------------------------------
 
-#endif /* INC_STM32L476RG_H_ */
+#endif /* INC_STM32L476XX_H_ */
