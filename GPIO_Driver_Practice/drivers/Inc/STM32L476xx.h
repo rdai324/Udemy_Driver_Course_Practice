@@ -13,14 +13,17 @@
 //---------------------------------------------Start of Written Code--------------------------------------
 
 #define vol		volatile
-#define EN		1
-#define ENABLE	1
-#define SET		1
-#define HI		1
-#define DI		0
-#define DISABLE	0
-#define RESET	0
-#define LO		0
+
+typedef enum {
+	DI =		0,
+	DISABLE =	0,
+	RESET =		0,
+	LO =		0,
+	EN =		1,
+	ENABLE =	1,
+	SET =		1,
+	HI =		1
+} BOOL;
 
 // Memory Base Address Macros
 #define FLASH_BASE_ADDR		0x08000000UL
@@ -218,14 +221,14 @@ typedef struct {
 /*
  * Clock Disable Macros
  */
-#define GPIOA_PCLK_DI()	(RCC->AHB2ENR &= ~(1<<0))
-#define GPIOB_PCLK_DI()	(RCC->AHB2ENR &= ~(1<<1))
-#define GPIOC_PCLK_DI()	(RCC->AHB2ENR &= ~(1<<2))
-#define GPIOD_PCLK_DI()	(RCC->AHB2ENR &= ~(1<<3))
-#define GPIOE_PCLK_DI()	(RCC->AHB2ENR &= ~(1<<4))
-#define GPIOF_PCLK_DI()	(RCC->AHB2ENR &= ~(1<<5))
-#define GPIOG_PCLK_DI()	(RCC->AHB2ENR &= ~(1<<6))
-#define GPIOH_PCLK_DI()	(RCC->AHB2ENR &= ~(1<<7))
+#define GPIOA_PCLK_DI()		(RCC->AHB2ENR &= ~(1<<0))
+#define GPIOB_PCLK_DI()		(RCC->AHB2ENR &= ~(1<<1))
+#define GPIOC_PCLK_DI()		(RCC->AHB2ENR &= ~(1<<2))
+#define GPIOD_PCLK_DI()		(RCC->AHB2ENR &= ~(1<<3))
+#define GPIOE_PCLK_DI()		(RCC->AHB2ENR &= ~(1<<4))
+#define GPIOF_PCLK_DI()		(RCC->AHB2ENR &= ~(1<<5))
+#define GPIOG_PCLK_DI()		(RCC->AHB2ENR &= ~(1<<6))
+#define GPIOH_PCLK_DI()		(RCC->AHB2ENR &= ~(1<<7))
 
 #define I2C1_PCLK_DI()		(RCC->APB1ENR1 &= ~(1<<21))
 #define I2C2_PCLK_DI()		(RCC->APB1ENR1 &= ~(1<<22))
@@ -238,8 +241,8 @@ typedef struct {
 #define USART1_PCLK_DI()	(RCC->APB2ENR &= ~(1<<14))
 #define USART2_PCLK_DI()	(RCC->APB1ENR1 &= ~(1<<17))
 #define USART3_PCLK_DI()	(RCC->APB1ENR1 &= ~(1<<18))
-#define UART4_PCLK_DI()	(RCC->APB1ENR1 &= ~(1<<19))
-#define UART5_PCLK_DI()	(RCC->APB1ENR1 &= ~(1<<20))
+#define UART4_PCLK_DI()		(RCC->APB1ENR1 &= ~(1<<19))
+#define UART5_PCLK_DI()		(RCC->APB1ENR1 &= ~(1<<20))
 
 #define SYSCFG_PCLK_DI()	(RCC->APB2ENR &= ~(1<<0))
 
