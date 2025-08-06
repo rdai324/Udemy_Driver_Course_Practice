@@ -180,7 +180,6 @@ typedef struct {
  * Peripheral Macros
  */
 #define RCC		((RCC_RegDef_t*) RCC_BASE_ADDR)
-
 #define GPIOA	((GPIOx_RegDef_t*) GPIOA_BASE_ADDR)
 #define GPIOB	((GPIOx_RegDef_t*) GPIOB_BASE_ADDR)
 #define GPIOC	((GPIOx_RegDef_t*) GPIOC_BASE_ADDR)
@@ -189,6 +188,18 @@ typedef struct {
 #define GPIOF	((GPIOx_RegDef_t*) GPIOF_BASE_ADDR)
 #define GPIOG	((GPIOx_RegDef_t*) GPIOG_BASE_ADDR)
 #define GPIOH	((GPIOx_RegDef_t*) GPIOH_BASE_ADDR)
+
+/*
+ * GPIO Reset macros
+ */
+#define GPIOA_REG_RESET()	do { (RCC->AHB2RSTR |= (1 << 0)); (RCC->AHB2RSTR &= ~(1 << 0));} while(0)
+#define GPIOB_REG_RESET()	do { (RCC->AHB2RSTR |= (1 << 1)); (RCC->AHB2RSTR &= ~(1 << 1));} while(0)
+#define GPIOC_REG_RESET()	do { (RCC->AHB2RSTR |= (1 << 2)); (RCC->AHB2RSTR &= ~(1 << 2));} while(0)
+#define GPIOD_REG_RESET()	do { (RCC->AHB2RSTR |= (1 << 3)); (RCC->AHB2RSTR &= ~(1 << 3));} while(0)
+#define GPIOE_REG_RESET()	do { (RCC->AHB2RSTR |= (1 << 4)); (RCC->AHB2RSTR &= ~(1 << 4));} while(0)
+#define GPIOF_REG_RESET()	do { (RCC->AHB2RSTR |= (1 << 5)); (RCC->AHB2RSTR &= ~(1 << 5));} while(0)
+#define GPIOG_REG_RESET()	do { (RCC->AHB2RSTR |= (1 << 6)); (RCC->AHB2RSTR &= ~(1 << 6));} while(0)
+#define GPIOH_REG_RESET()	do { (RCC->AHB2RSTR |= (1 << 7)); (RCC->AHB2RSTR &= ~(1 << 7));} while(0)
 
 /*
  * Clock Enable Macros

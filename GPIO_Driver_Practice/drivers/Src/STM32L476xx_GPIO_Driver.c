@@ -27,7 +27,7 @@ void GPIO_Reg_Clear_Pin_Bits(uint32_t GPIO_Reg_Addr, GPIO_PIN GPIO_PinNum, GPIO_
 
 
 /*
- * GPIO_Reg_Set_Pin_Bits - Sets the bits of a GPIO Register for a specified GPIO Pin to a desired value
+ * GPIO_Reg_Set_Pin_Bits - Sets bits of a GPIO Register for a specified GPIO Pin
  *
  * Params
  * 		GPIO_Reg_Addr: Address of register to clear bits from
@@ -36,6 +36,10 @@ void GPIO_Reg_Clear_Pin_Bits(uint32_t GPIO_Reg_Addr, GPIO_PIN GPIO_PinNum, GPIO_
  *		GPIO_Set_Value: Value to set the reg bits to
  *
  * Return: None
+ *
+ * Note: It is recommended to use this function with GPIO_Reg_Clear_Pin_Bits,
+ * 		as this function does not reset reg bits to 0.
+ * 		ex. GPIO_Set_Value = 0b10 will not reset the rightmost bit to 0.
  */
 void GPIO_Reg_Set_Pin_Bits(uint32_t GPIO_RegAddr, GPIO_PIN GPIO_PinNum, GPIO_BITWIDTH GPIO_Pin_BitWidth, uint8_t GPIO_Set_Value) {
 	GPIO_RegAddr |= GPIO_Set_Value << (GPIO_Pin_BitWidth * GPIO_PinNum);
@@ -86,7 +90,17 @@ void GPIO_Init(GPIO_PinHandle_t* pGPIO_PinHandle) {
  * Return: None
  */
 void GPIO_DeInit(GPIOx_RegDef_t* pGPIOx) {
-
+	switch ((uint32_t) pGPIOx) {
+		case GPIOA_BASE_ADDR:		GPIOA_REG_RESET();	break;
+		case GPIOB_BASE_ADDR:		GPIOB_REG_RESET();	break;
+		case GPIOC_BASE_ADDR:		GPIOC_REG_RESET();	break;
+		case GPIOD_BASE_ADDR:		GPIOD_REG_RESET();	break;
+		case GPIOE_BASE_ADDR:		GPIOE_REG_RESET();	break;
+		case GPIOF_BASE_ADDR:		GPIOF_REG_RESET();	break;
+		case GPIOG_BASE_ADDR:		GPIOG_REG_RESET();	break;
+		case GPIOH_BASE_ADDR:		GPIOH_REG_RESET();	break;
+		default:					return;
+	}
 }
 
 /*
@@ -137,7 +151,7 @@ void GPIO_Pclk_Ctrl(GPIOx_RegDef_t* pGPIOx, BOOL ENorDI) {
  * Return: 1 or 0 corresponding to the pin state
  */
 uint8_t GPIO_ReadPin(GPIOx_RegDef_t* pGPIOx, GPIO_PIN pinNum) {
-	return 0;	//WIP
+	return ((pGPIOx->IDR) >> pinNum) & 1;
 }
 
 /*
@@ -149,7 +163,7 @@ uint8_t GPIO_ReadPin(GPIOx_RegDef_t* pGPIOx, GPIO_PIN pinNum) {
  * Return: 16-bit integer corresponding to the GPIO port's 16 pin states
  */
 uint16_t GPIO_ReadPort(GPIOx_RegDef_t* pGPIOx) {
-	return 0;	// WIP
+	return pGPIOx->IDR;
 }
 
 /*
@@ -163,7 +177,11 @@ uint16_t GPIO_ReadPort(GPIOx_RegDef_t* pGPIOx) {
  * Return: None
  */
 void GPIO_WritePin(GPIOx_RegDef_t* pGPIOx, GPIO_PIN pinNum, BOOL value) {
-
+	if (value == SET) {
+		pGPIOx->ODR |= 1 << pinNum;
+	} else {
+		pGPIOx->ODR &= ~(1 << pinNum);
+	}
 }
 
 /*
@@ -176,7 +194,7 @@ void GPIO_WritePin(GPIOx_RegDef_t* pGPIOx, GPIO_PIN pinNum, BOOL value) {
  * Return: None
  */
 void GPIO_WritePort(GPIOx_RegDef_t* pGPIOx, uint16_t value) {
-
+	pGPIOx->ODR = value;
 }
 
 /*
@@ -190,6 +208,7 @@ void GPIO_WritePort(GPIOx_RegDef_t* pGPIOx, uint16_t value) {
  */
 void GPIO_TogglePin(GPIOx_RegDef_t* pGPIOx, GPIO_PIN pinNum) {
 
+	pGPIOx->ODR ^= (1 << pinNum);
 }
 
 /*
