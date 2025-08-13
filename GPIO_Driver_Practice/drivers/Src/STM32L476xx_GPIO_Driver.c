@@ -15,14 +15,14 @@
  *
  * Params
  * 		GPIO_Reg_Addr: Address of register to clear bits from
- *		GPIO_PinNum: Pin to clear bits for
+ *		GPIO_PinNum: Number of pins to shift past in the reg. Typically equal to the Pin# to set bits for
  *		GPIO_Pin_BitWidth: Number of bits used per pin in the register
  *		GPIO_Clear_Mask: Bitmask used to clear reg bits
  *
  * Return: None
  */
-void GPIO_Reg_Clear_Pin_Bits(uint32_t GPIO_Reg_Addr, GPIO_PIN GPIO_PinNum, GPIO_BITWIDTH GPIO_Pin_BitWidth, GPIO_CLEARMASK GPIO_Clear_Mask) {
-	GPIO_Reg_Addr &= ~(GPIO_Clear_Mask << (GPIO_Pin_BitWidth * GPIO_PinNum));
+void GPIO_Reg_Clear_Pin_Bits(uint32_t* GPIO_Reg_Addr, GPIO_PIN GPIO_PinNum, GPIO_BITWIDTH GPIO_Pin_BitWidth, GPIO_CLEARMASK GPIO_Clear_Mask) {
+	*(GPIO_Reg_Addr) &= ~(GPIO_Clear_Mask << (GPIO_Pin_BitWidth * GPIO_PinNum));
 }
 
 
@@ -31,8 +31,8 @@ void GPIO_Reg_Clear_Pin_Bits(uint32_t GPIO_Reg_Addr, GPIO_PIN GPIO_PinNum, GPIO_
  *
  * Params
  * 		GPIO_Reg_Addr: Address of register to clear bits from
- *		GPIO_PinNum: Pin to clear bits for
- *		GPIO_Pin_BitWidth: Number of bits used per pin in the register
+ *		GPIO_PinNum: Number of pins to shift past in the reg. Typically equal to the Pin# to clear bits for
+ *		GPIO_Pin_BitWidth: Number of bits used per pin in the register.
  *		GPIO_Set_Value: Value to set the reg bits to
  *
  * Return: None
@@ -41,8 +41,8 @@ void GPIO_Reg_Clear_Pin_Bits(uint32_t GPIO_Reg_Addr, GPIO_PIN GPIO_PinNum, GPIO_
  * 		as this function does not reset reg bits to 0.
  * 		ex. GPIO_Set_Value = 0b10 will not reset the rightmost bit to 0.
  */
-void GPIO_Reg_Set_Pin_Bits(uint32_t GPIO_RegAddr, GPIO_PIN GPIO_PinNum, GPIO_BITWIDTH GPIO_Pin_BitWidth, uint8_t GPIO_Set_Value) {
-	GPIO_RegAddr |= GPIO_Set_Value << (GPIO_Pin_BitWidth * GPIO_PinNum);
+void GPIO_Reg_Set_Pin_Bits(uint32_t* GPIO_RegAddr, GPIO_PIN GPIO_PinNum, GPIO_BITWIDTH GPIO_Pin_BitWidth, uint8_t GPIO_Set_Value) {
+	*(GPIO_RegAddr) |= GPIO_Set_Value << (GPIO_Pin_BitWidth * GPIO_PinNum);
 }
 
 /*
@@ -58,26 +58,55 @@ void GPIO_Init(GPIO_PinHandle_t* pGPIO_PinHandle) {
 	GPIO_PinConfig_t config = pGPIO_PinHandle->GPIO_PinConfig;
 	GPIOx_RegDef_t* base = pGPIO_PinHandle->pGPIOx_Base;
 
-	GPIO_Reg_Clear_Pin_Bits(base->MODER, pinNum, GPIO_MODE_BITWIDTH, GPIO_MODE_CLEAR);
-	GPIO_Reg_Set_Pin_Bits(base->MODER, pinNum, GPIO_MODE_BITWIDTH, config.GPIO_PinMode);
+	if (config.GPIO_ITMode == GPIO_IT_NO) {
+		// Configure GPIO pin settings from the provided PinHandle sstruct
+		GPIO_Reg_Clear_Pin_Bits(&(base->MODER), pinNum, GPIO_MODE_BITWIDTH, GPIO_MODE_CLEAR);
+		GPIO_Reg_Set_Pin_Bits(&(base->MODER), pinNum, GPIO_MODE_BITWIDTH, config.GPIO_PinMode);
 
-	GPIO_Reg_Clear_Pin_Bits(base->OTYPER, pinNum, GPIO_OUTTYPE_BITWIDTH, GPIO_OUTTYPE_CLEAR);
-	GPIO_Reg_Set_Pin_Bits(base->OTYPER, pinNum, GPIO_OUTTYPE_BITWIDTH, config.GPIO_PinOutType);
+		GPIO_Reg_Clear_Pin_Bits(&(base->OTYPER), pinNum, GPIO_OUTTYPE_BITWIDTH, GPIO_OUTTYPE_CLEAR);
+		GPIO_Reg_Set_Pin_Bits(&(base->OTYPER), pinNum, GPIO_OUTTYPE_BITWIDTH, config.GPIO_PinOutType);
 
-	GPIO_Reg_Clear_Pin_Bits(base->OSPEEDR, pinNum, GPIO_OUTSPD_BITWIDTH, GPIO_OUTSPD_CLEAR);
-	GPIO_Reg_Set_Pin_Bits(base->OSPEEDR, pinNum, GPIO_OUTSPD_BITWIDTH, config.GPIO_PinOutSpd);
+		GPIO_Reg_Clear_Pin_Bits(&(base->OSPEEDR), pinNum, GPIO_OUTSPD_BITWIDTH, GPIO_OUTSPD_CLEAR);
+		GPIO_Reg_Set_Pin_Bits(&(base->OSPEEDR), pinNum, GPIO_OUTSPD_BITWIDTH, config.GPIO_PinOutSpd);
 
-	GPIO_Reg_Clear_Pin_Bits(base->PUPDR, pinNum, GPIO_PUPD_BITWIDTH, GPIO_PUPD_CLEAR);
-	GPIO_Reg_Set_Pin_Bits(base->PUPDR, pinNum, GPIO_PUPD_BITWIDTH, config.GPIO_PinPupd);
+		GPIO_Reg_Clear_Pin_Bits(&(base->PUPDR), pinNum, GPIO_PUPD_BITWIDTH, GPIO_PUPD_CLEAR);
+		GPIO_Reg_Set_Pin_Bits(&(base->PUPDR), pinNum, GPIO_PUPD_BITWIDTH, config.GPIO_PinPupd);
 
-	if (config.GPIO_PinMode == GPIO_MODE_ALT) {
-		if (pinNum < GPIO_ALTL_NUMPINS) {
-			GPIO_Reg_Clear_Pin_Bits(base->AFRL, pinNum, GPIO_ALT_BITWIDTH, GPIO_ALT_CLEAR);
-			GPIO_Reg_Set_Pin_Bits(base->AFRL, pinNum, GPIO_ALT_BITWIDTH, config.GPIO_PinAltFunc);
-		} else {
-			GPIO_Reg_Clear_Pin_Bits(base->AFRL, pinNum - GPIO_ALTL_NUMPINS, GPIO_ALT_BITWIDTH, GPIO_ALT_CLEAR);
-			GPIO_Reg_Set_Pin_Bits(base->AFRL, pinNum - GPIO_ALTL_NUMPINS, GPIO_ALT_BITWIDTH, config.GPIO_PinAltFunc);
+		if (config.GPIO_PinMode == GPIO_MODE_ALT) {
+			if (pinNum < GPIO_ALTL_NUMPINS) {
+				GPIO_Reg_Clear_Pin_Bits(&(base->AFRL), pinNum, GPIO_ALT_BITWIDTH, GPIO_ALT_CLEAR);
+				GPIO_Reg_Set_Pin_Bits(&(base->AFRL), pinNum, GPIO_ALT_BITWIDTH, config.GPIO_PinAltFunc);
+			} else {
+				GPIO_Reg_Clear_Pin_Bits(&(base->AFRH), pinNum - GPIO_ALTL_NUMPINS, GPIO_ALT_BITWIDTH, GPIO_ALT_CLEAR);
+				GPIO_Reg_Set_Pin_Bits(&(base->AFRH), pinNum - GPIO_ALTL_NUMPINS, GPIO_ALT_BITWIDTH, config.GPIO_PinAltFunc);
+			}
 		}
+	} else {
+		// Configure GPIO interrupt trigger
+		if (config.GPIO_ITMode == GPIO_IT_RT) {
+			GPIO_Reg_Clear_Pin_Bits(&(EXTI->FTSR1), pinNum, 1, 1);
+			GPIO_Reg_Set_Pin_Bits(&(EXTI->RTSR1), pinNum, 1, 1);
+		}
+		if (config.GPIO_ITMode == GPIO_IT_FT) {
+			GPIO_Reg_Clear_Pin_Bits(&(EXTI->RTSR1), pinNum, 1, 1);
+			GPIO_Reg_Set_Pin_Bits(&(EXTI->FTSR1), pinNum, 1, 1);
+		}
+		if (config.GPIO_ITMode == GPIO_IT_RFT) {
+			GPIO_Reg_Set_Pin_Bits(&(EXTI->RTSR1), pinNum, 1, 1);
+			GPIO_Reg_Set_Pin_Bits(&(EXTI->FTSR1), pinNum, 1, 1);
+		}
+
+		// Configure interrupt source for the EXTI line
+		SYSCFG_PCLK_EN();
+
+		uint8_t exticrx = pinNum / SYSCFG_EXTICR_NUMPINS + 1;
+		uint8_t shift_amount = pinNum % SYSCFG_EXTICR_NUMPINS;
+		uint32_t* EXTICRX = &(SYSCFG->EXTICR1) + exticrx - 1;
+		GPIO_Reg_Clear_Pin_Bits(EXTICRX, shift_amount, SYSCFG_EXTICR_BITWIDTH, SYSCFG_EXTICR_CLEAR);
+		GPIO_Reg_Set_Pin_Bits(EXTICRX, shift_amount, SYSCFG_EXTICR_BITWIDTH, pGPIO_PinHandle->GPIO_Port);
+
+		// Unmask interrupt in EXTI
+		GPIO_Reg_Set_Pin_Bits(&(EXTI->IMR1), pinNum, 1, 1);
 	}
 }
 
@@ -207,7 +236,6 @@ void GPIO_WritePort(GPIOx_RegDef_t* pGPIOx, uint16_t value) {
  * Return: None
  */
 void GPIO_TogglePin(GPIOx_RegDef_t* pGPIOx, GPIO_PIN pinNum) {
-
 	pGPIOx->ODR ^= (1 << pinNum);
 }
 
@@ -223,6 +251,37 @@ void GPIO_TogglePin(GPIOx_RegDef_t* pGPIOx, GPIO_PIN pinNum) {
  */
 void GPIO_IRQConfig(uint8_t IRQ_Num, uint8_t IRQ_Prio, BOOL ENorDI) {
 
+	// Enable/disable IRQ number in NVIC
+	if (ENorDI == EN) {
+		uint8_t irqx = IRQ_Num / NVIC_ISER_NUM_IRQ;
+		uint8_t shift_amount = IRQ_Num % NVIC_ISER_NUM_IRQ;
+		GPIO_Reg_Clear_Pin_Bits(NVIC_ICER_BASE + irqx, shift_amount, 1, 1);
+		GPIO_Reg_Set_Pin_Bits(NVIC_ISER_BASE + irqx, shift_amount, 1, 1);
+	} else {
+		uint8_t irqx = IRQ_Num / NVIC_ISER_NUM_IRQ;
+		uint8_t shift_amount = IRQ_Num % NVIC_ISER_NUM_IRQ;
+		GPIO_Reg_Clear_Pin_Bits(NVIC_ISER_BASE + irqx, shift_amount, 1, 1);
+		GPIO_Reg_Set_Pin_Bits(NVIC_ICER_BASE + irqx, shift_amount, 1, 1);
+	}
+
+	// Set IRQ priority
+	GPIO_IRQPriorityConfig(IRQ_Num, IRQ_Prio);
+}
+
+/*
+ * GPIO_IRQ_PriorityConfig - Set the IRQ priority value for a GPIO Interrupt
+ *
+ * Params
+ * 		IRQ_Num: IRQ Number
+ * 		IRQ_Prio: Desired IRQ exception priority
+ *
+ * Return: None
+ */
+void GPIO_IRQPriorityConfig(uint8_t IRQ_Num, uint8_t IRQ_Prio) {
+	uint8_t iprx = IRQ_Num / NVIC_IPR_NUM_IRQ;
+	uint8_t shift_amount = (IRQ_Num % NVIC_IPR_NUM_IRQ);
+	GPIO_Reg_Clear_Pin_Bits(NVIC_IPR_BASE + iprx, shift_amount, NVIC_IPR_BITWIDTH, NVIC_IPR_CLEAR);
+	GPIO_Reg_Set_Pin_Bits(NVIC_IPR_BASE + iprx, shift_amount, NVIC_IPR_BITWIDTH, IRQ_Prio << NVIC_IPR_NUM_BITS_UNIMPLEMENTED);
 }
 
 /*
@@ -234,7 +293,10 @@ void GPIO_IRQConfig(uint8_t IRQ_Num, uint8_t IRQ_Prio, BOOL ENorDI) {
  * Return: None
  */
 void GPIO_IRQHandling(GPIO_PIN pinNum) {
-
+	if(EXTI->PR1 & (1 << pinNum)) {
+		// PR bits are cleared by writing 1
+		GPIO_Reg_Set_Pin_Bits(&(EXTI->PR1), pinNum, 1, 1);
+	}
 }
 
 //---------------------------------------------End of Written Code--------------------------------------

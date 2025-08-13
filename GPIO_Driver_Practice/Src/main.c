@@ -28,3 +28,27 @@ int main(void)
     /* Loop forever */
 	for(;;);
 }
+
+void EXTI0_IRQHandler() {
+	GPIO_IRQHandling(0);
+}
+void EXTI1_IRQHandler() {
+	GPIO_IRQHandling(1);
+}
+void EXTI2_IRQHandler() {
+	GPIO_IRQHandling(2);
+}
+void EXTI3_IRQHandler() {
+	GPIO_IRQHandling(3);
+}
+void EXTI4_IRQHandler() {
+	GPIO_IRQHandling(4);
+}
+
+/*
+void EXTI9_5_IRQHandler() {
+	GPIO_IRQHandling(5);
+}
+void EXTI15_10_IRQHandler() {
+	GPIO_IRQHandling(10);
+}*/

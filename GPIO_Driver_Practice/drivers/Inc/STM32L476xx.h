@@ -25,6 +25,18 @@ typedef enum {
 	HI =		1
 } BOOL;
 
+// M4 Processor Addresses
+#define NVIC_ISER_BASE		((uint32_t*) 0xE000E100)
+#define NVIC_ISER_NUM_IRQ	32
+
+#define NVIC_ICER_BASE		((uint32_t*) 0xE000E180)
+
+#define NVIC_IPR_BASE					((uint32_t*) 0xE000E400)
+#define NVIC_IPR_NUM_IRQ				4
+#define NVIC_IPR_BITWIDTH				8
+#define NVIC_IPR_CLEAR					0b11110000
+#define NVIC_IPR_NUM_BITS_UNIMPLEMENTED	4
+
 // Memory Base Address Macros
 #define FLASH_BASE_ADDR		0x08000000UL
 #define ROM_BASE_ADDR		0x1FFF0000UL
@@ -78,8 +90,49 @@ typedef enum {
 #define USART1_BASE_ADDR	(APB2_BASE_ADDR + 0x00003800UL)
 
 /*
- * Peripheral Structures
+ * Peripheral Structures and Enums
  */
+
+typedef enum {
+	IRQ_NUM_EXTI0 =		6,
+	IRQ_NUM_EXTI1 =		7,
+	IRQ_NUM_EXTI2 =		8,
+	IRQ_NUM_EXTI3 =		9,
+	IRQ_NUM_EXTI4 =		10,
+	IRQ_NUM_EXTI9_5 =	23,
+	IRQ_NUM_EXTI15_10 =	40
+} IRQ_NUM;
+
+typedef enum {
+	PIN_0,
+	PIN_1,
+	PIN_2,
+	PIN_3,
+	PIN_4,
+	PIN_5,
+	PIN_6,
+	PIN_7,
+	PIN_8,
+	PIN_9,
+	PIN_10,
+	PIN_11,
+	PIN_12,
+	PIN_13,
+	PIN_14,
+	PIN_15
+} GPIO_PIN;
+
+typedef enum {
+	PORT_A,
+	PORT_B,
+	PORT_C,
+	PORT_D,
+	PORT_E,
+	PORT_F,
+	PORT_G,
+	PORT_H
+} GPIO_PORT;
+
 typedef struct {
 	vol uint32_t CR;			// clock control reg										0x00
 	vol uint32_t ICSCR;			// internal clock sources callibration reg					0x04
@@ -119,8 +172,6 @@ typedef struct {
 	uint32_t _RESERVED8_;		// xRESERVEDx
 	vol uint32_t BDCR;			// backup domain control reg								0x90
 	vol uint32_t CSR;			// control/status reg										0x94
-	vol uint32_t CRRCR;			// clock recovery RC reg									0x98
-	vol uint32_t CCIPR2;		// peripherals independent clock config reg					0x9C
 } RCC_RegDef_t;
 
 typedef struct {
@@ -176,6 +227,37 @@ typedef struct {
 	vol uint32_t TDR;		// USART transmit data reg			0x28
 } USARTx_RegDef_t;
 
+typedef struct {
+	vol uint32_t IMR1;			// Interrupt mask reg 1						0x00
+	vol uint32_t EMR1;			// Event mask reg 1							0x04
+	vol uint32_t RTSR1;			// Rising trigger selection reg 1			0x08
+	vol uint32_t FTSR1;			// Falling trigger selection reg 1			0x0C
+	vol uint32_t SWIER1;		// Software interrupt event reg 1			0x10
+	vol uint32_t PR1;			// Pending reg 1							0x14
+	vol uint32_t _RESERVED1_;	// xRESERVEDx
+	vol uint32_t _RESERVED2_;	// xRESERVEDx
+	vol uint32_t _RESERVED3_;	// xRESERVEDx
+	vol uint32_t IMR2;			// Interrupt mask reg 2						0x20
+	vol uint32_t EMR2;			// Event mask reg 2							0x24
+	vol uint32_t RTSR2;			// Rising trigger selection reg 2			0x28
+	vol uint32_t FTSR2;			// Falling trigger selection reg 2			0x2C
+	vol uint32_t SWIER2;		// Software interrupt event reg 2			0x30
+	vol uint32_t PR2;			// Pending reg 2							0x34
+} EXTIx_RegDef_t;
+
+typedef struct {
+	vol uint32_t MEMRMP;		// Memory remap reg					0x00
+	vol uint32_t CFGR1;			// Config reg 1						0x04
+	vol uint32_t EXTICR1;		// Ext. interrupt config reg 1		0x08
+	vol uint32_t EXTICR2;		// Ext. interrupt config reg 2		0x0C
+	vol uint32_t EXTICR3;		// Ext. interrupt config reg 3		0x10
+	vol uint32_t EXTICR4;		// Ext. interrupt config reg 4		0x14
+	vol uint32_t SCSR;			// SRAM2 control & status reg		0x18
+	vol uint32_t CFGR2;			// Config reg 2						0x1C
+	vol uint32_t SWPR;			// SRAM2 write protection reg		0x20
+	vol uint32_t SKR;			// SRAM2 key reg					0x24
+} SYSCFG_RegDef_t;
+
 /*
  * Peripheral Macros
  */
@@ -188,6 +270,8 @@ typedef struct {
 #define GPIOF	((GPIOx_RegDef_t*) GPIOF_BASE_ADDR)
 #define GPIOG	((GPIOx_RegDef_t*) GPIOG_BASE_ADDR)
 #define GPIOH	((GPIOx_RegDef_t*) GPIOH_BASE_ADDR)
+#define EXTI	((EXTIx_RegDef_t*) EXTI_BASE_ADDR)
+#define SYSCFG	((SYSCFG_RegDef_t*) SYSCFG_BASE_ADDR)
 
 /*
  * GPIO Reset macros
